@@ -18,7 +18,7 @@ class Persona < ActiveRecord::Base
 		arcana2 = persona2.arcana
 
 		level = 1 + ((persona1.base_level + persona2.base_level)/2).floor
-		arcana_combo = ArcanaFusionTwo.where(:arcana1_id => arcana1.id, :arcana2_id => arcana2_id).first
+		arcana_combo = ArcanaFusionTwo.where(:arcana1_id => arcana1.id, :arcana2_id => arcana2.id).first
 		personas = arcana_combo.arcana.personas
 
 		i = 0
@@ -82,14 +82,14 @@ class Persona < ActiveRecord::Base
 
 	def persona_recipes2(arcana)
 		recipes = []
-		combos = @combos2.select{|c2| c2.result_arcana_id == arcana.id}
+		combos = arcana.arcana_fusion_twos
 		combos.each do |combo|
-			personas1 = @per_all.select{|p| p.arcana_id == combo.arcana1_id}
-			personas2 = @per_all.select{|p| p.arcana_id == combo.arcana2_id}
+			personas1 = Persona.where(:arcana_id => combo.arcana1_id)
+			personas2 = Persona.where(:arcana_id => combo.arcana2_id)
 			personas1.each do |p1|
-				ar1 = @arc_all.select{|a| a.id == p1.arcana_id}
+				ar1 = p1.arcana
 				personas2.each do |p2|
-					ar2 = @arc_all.select{|a| a.id == p2.arcana_id}
+					ar2 = p2.arcana
 					next if ar1 == ar2
 					result = fuse2(p1,p2)
 					next if !result
