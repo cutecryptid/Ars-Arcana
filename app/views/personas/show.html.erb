@@ -1,0 +1,37 @@
+<p id="notice"><%= notice %></p>
+
+<h2><%= @persona.name %></h2>
+<h3><%= @persona.arcana.name %> / <%= @persona.base_level %></h3>
+<% if @persona.special_fusions[0] != nil%>
+	<h3>Special Fusions</h3>
+	<ul>
+	<% @persona.special_fusions.each do |sp_fus| %>
+		<li>
+    	<%
+    		ingr_id = JSON.parse (sp_fus.ingr)
+    		ingr_id.each do |per_id|
+    			persona = Persona.find(per_id)
+    			concat link_to persona.name, arcana_persona_path(persona.arcana.slug, persona.slug)
+    			if per_id != ingr_id.last
+    				concat ', '
+    			end
+    		end
+    	%>
+    	</li>
+    <% end %>
+    </ul>
+<% else %>
+	<h3>Normal Fusions</h3>
+	<ul>
+    <%= @persona.get_recipes %>
+        <li>
+        </li>
+	</ul>
+<% end %>
+
+<br>
+<%= link_to 'Add Special Fusion', new_arcana_persona_special_fusion_path(@arcana.slug, @persona.slug) %>
+<br>
+<%= link_to 'Edit', edit_arcana_persona_path(@arcana.slug, @persona.slug) %> |
+<%= link_to 'Back to Arcana', arcana_path(@arcana.slug) %> |
+<%= link_to 'Back to Persona List', personas_path %>

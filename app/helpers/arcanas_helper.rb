@@ -1,0 +1,2 @@
+module ArcanasHelper
+end

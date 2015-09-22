@@ -1,0 +1,21 @@
+<%= form_for [@arcana, @persona, @special_fusion] do |f| %>
+  <% if @special_fusion.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@special_fusion.errors.count, "error") %> prohibited this persona from being saved:</h2>
+
+      <ul>
+      <% @special_fusion.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :ingr %><br>
+    <%= f.autocomplete_field :ingr, autocomplete_persona_name_arcana_persona_special_fusions_path, 'data-delimiter' => ',' %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

@@ -1,0 +1,23 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Arcanas</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Number</th>
+      <th>Name</th>
+      <th colspan="1"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @arcanas.each do |arcana| %>
+      <tr>
+        <td><%= arcana.number %></td>
+        <td><%= arcana.name %></td>
+        <td><%= link_to 'Show', arcana_path(arcana.slug) %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

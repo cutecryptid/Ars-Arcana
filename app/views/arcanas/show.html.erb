@@ -1,0 +1,32 @@
+<p id="notice"><%= notice %></p>
+
+<h2>
+  <%= @arcana.number %> - <%= @arcana.name %>
+</h2>
+
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Base level</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @personas.each do |persona| %>
+      <tr>
+        <td><%= persona.name %></td>
+        <td><%= persona.base_level %></td>
+        <td><%= link_to 'Show', arcana_persona_path(@arcana.slug, persona.slug) %></td></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'Add Persona to Arcana', new_arcana_persona_path(:arcana_id => @arcana.slug) %> <br>
+<%= link_to 'Edit', edit_arcana_path(@arcana) %> |
+<%= link_to 'Back', arcanas_path %>

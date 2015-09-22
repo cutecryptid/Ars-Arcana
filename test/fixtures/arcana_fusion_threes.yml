@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  arcana1: 
+  arcana2: 
+  arcana3: 
+
+two:
+  arcana1: 
+  arcana2: 
+  arcana3: 
