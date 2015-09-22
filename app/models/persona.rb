@@ -14,17 +14,17 @@ class Persona < ActiveRecord::Base
     end
 
 	def fuse2(persona1, persona2)
-		arcana1 = @arc_all.select{|a| a.id == persona1.arcana_id}.first
-		arcana2 = @arc_all.select{|a| a.id == persona2.arcana_id}.first
+		arcana1 = persona1.arcana
+		arcana2 = persona2.arcana
 
 		level = 1 + ((persona1.base_level + persona2.base_level)/2).floor
-		arcana = @combos2.select{|c2| (c2.arcana1_id == arcana1.id && c2.arcana2_id == arcana2.id) || (c2.arcana1_id == arcana2.id && c2.arcana2_id == arcana1.id)}
-		personas = @per_all.select{|p| p.arcana_id == arcana.first.result_arcana_id}
+		arcana_combo = ArcanaFusionTwo.where(:arcana1_id => arcana1.id, :arcana2_id => arcana2_id).first
+		personas = arcana_combo.arcana.personas
 
 		i = 0
 		personas.each do |per|
 			if (per.base_level >= level)
-				next if @sp_fus_all.select{|sp| sp.persona_id == per.id}.length != 0
+				next if per.special_fusions.length != 0
 				break
 			end
 			i += 1
@@ -42,20 +42,20 @@ class Persona < ActiveRecord::Base
 	end
 
 	def fuse3(persona1, persona2, persona3)
-		arcana1 = @arc_all.select{|a| a.id == p1.arcana_id}
-		arcana2 = @arc_all.select{|a| a.id == p2.arcana_id}
-		arcana3 = @arc_all.select{|a| a.id == p3.arcana_id}
+		arcana1 = persona1.arcana
+		arcana2 = persona2.arcana
+		arcana3 = persona3.arcana
 
 		level = 5 + ((persona1.base_level + persona2.base_level + persona3)/3).floor
-		arcana = @combos2.select{|c2| (c2.arcana1_id == arcana1.id && c2.arcana2_id == arcana2.id) || (c2.arcana1_id == arcana2.id && c2.arcana2_id == arcana1.id)}
-		arcana_final = @combos3.select{|c3| c3.arcana1_id == arcana1.id && c3.arcana2_id == arcana2.id}
-		personas = @per_all.select{|p| p.arcana_id == arcana_final.first.result_arcana_id}
+		arcana_combo = ArcanaFusionTwo.where(:arcana1_id => arcana1.id, :arcana2_id => arcana2_id).first
+		arcana_combo_final = ArcanaFusionThree.where(:arcana1_id => arcana_combo.arcana.id, :arcana2_id => arcana3.id).first
+		personas = arcana_combo_final.arcana.personas
 
 		found = false
 		i = 0
 		personas.each do |per|
 			if (per.base_level >= level)
-				next if @sp_fus_all.select{|sp| sp.persona_id == per.id}.length != 0
+				next if per.special_fusions.length != 0
 				found = true
 				break
 			end
@@ -105,10 +105,10 @@ class Persona < ActiveRecord::Base
 		recipes = []
 		step1Recipes = persona_recipes2(arcana1)
 		step1Recipes.each do |s1Recipe|
-			p1 = @per_all.select{|p| p.arcana_id == s1Recipe.arcana1_id}
-			p2 = @per_all.select{|p| p.arcana_id == s1Recipe.arcana2_id}
-			personas = @per_all.select{|p| p.arcana_id == arcana2.id}
-			pers.each do |p3|
+			p1 = Persona.where(:arcana_id => s1Recipe.arcana1_id)
+			p2 = Persona.where(:arcana_id => s1Recipe.arcana2_id)
+			personas = arcana2.personas
+			personas.each do |p3|
 				if persona3IsValid(p1,p2,p3)
 					result = fuse3(p1,p2,p3)
 					next if (!result || result.name != self.name)
@@ -120,9 +120,9 @@ class Persona < ActiveRecord::Base
 	end
 
 	def persona3IsValid(p1,p2,p3)
-		ar1 = @arc_all.select{|a| a.id == p1.arcana_id}
-		ar2 = @arc_all.select{|a| a.id == p2.arcana_id}
-		ar3 = @arc_all.select{|a| a.id == p3.arcana_id}
+		ar1 = p1.arcana
+		ar2 = p2.arcana
+		ar3 = p3.arcana
 
 		return false if (p3 == p1)
 		return false if (p2 == p1)
@@ -142,21 +142,15 @@ class Persona < ActiveRecord::Base
 	end
 
 	def get_recipes
-		@combos2 = ArcanaFusionTwo.all
-		@combos3 = ArcanaFusionThree.all
-		@arc_all = Arcana.all
-		@per_all = Persona.all
-		@sp_fus_all = SpecialFusion.all
-
 		recipes = []
-		self_arcana = @arc_all.select{|a| a.id == self.arcana_id}.first
+		self_arcana = self.arcana
 
 		recipes = persona_recipes2(self_arcana)
-		combos = @combos3.select{|c3| c3.result_arcana_id == self_arcana.id}
+		combos = ArcanaFusionThree.where(:result_arcana_id => self_arcana.id)
 
 		combos.each do |combo|
-			arcana1 = @arc_all.select{|a| a.id == combo.arcana1_id}.first
-			arcana2 = @arc_all.select{|a| a.id == combo.arcana2_id}.first
+			arcana1 = Arcana.find(combo.arcana1_id)
+			arcana2 = Arcana.find(combo.arcana2_id)
 			recipes << persona_recipes3(arcana1, arcana2)
 			if combo.arcana2_id != combo.arcana1_id
 				recipes << persona_recipes3(arcana2, arcana1)
