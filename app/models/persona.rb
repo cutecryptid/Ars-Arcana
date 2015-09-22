@@ -24,7 +24,7 @@ class Persona < ActiveRecord::Base
 		i = 0
 		personas.each do |per|
 			if (per.base_level >= level)
-				next if per.special_fusions.length != 0
+				next if per.special == 1
 				break
 			end
 			i += 1
@@ -49,13 +49,13 @@ class Persona < ActiveRecord::Base
 		level = 5 + ((persona1.base_level + persona2.base_level + persona3)/3).floor
 		arcana_combo = ArcanaFusionTwo.where(:arcana1_id => arcana1.id, :arcana2_id => arcana2_id).first
 		arcana_combo_final = ArcanaFusionThree.where(:arcana1_id => arcana_combo.arcana.id, :arcana2_id => arcana3.id).first
-		personas = arcana_combo_final.arcana.personas
+		personas = arcana_combo.arcana.personas
 
 		found = false
 		i = 0
 		personas.each do |per|
 			if (per.base_level >= level)
-				next if per.special_fusions.length != 0
+				next if per.special == 1
 				found = true
 				break
 			end
@@ -82,19 +82,21 @@ class Persona < ActiveRecord::Base
 
 	def persona_recipes2(arcana)
 		recipes = []
-		combos = arcana.arcana_fusion_twos
+		combos = arcana.arcana_fusion_twos.includes(:arcana1).includes(:arcana2)
 		combos.each do |combo|
-			personas1 = Persona.where(:arcana_id => combo.arcana1_id)
-			personas2 = Persona.where(:arcana_id => combo.arcana2_id)
+			personas1 = combo.arcana1.personas
+			personas2 = combo.arcana2.personas
+			j = 0
+			k = 0
 			personas1.each do |p1|
 				ar1 = p1.arcana
 				personas2.each do |p2|
 					ar2 = p2.arcana
-					next if ar1 == ar2
+					next if (ar1 == ar2 && (p1.base_level >= p2.base_level))
 					result = fuse2(p1,p2)
 					next if !result
 					next if filter2Way(p1,p2,result)
-					recipes << {:cost => fusion_cost([p1, p2]), :ingr => [p1.id, p2.id]}
+					recipes << {:cost => fusion_cost([p1, p2]), :ingr => [p1, p2]}
 				end
 			end
 		end
@@ -105,14 +107,14 @@ class Persona < ActiveRecord::Base
 		recipes = []
 		step1Recipes = persona_recipes2(arcana1)
 		step1Recipes.each do |s1Recipe|
-			p1 = Persona.where(:arcana_id => s1Recipe.arcana1_id)
-			p2 = Persona.where(:arcana_id => s1Recipe.arcana2_id)
+			p1 = s1Recipe[:ingr][0]
+			p2 = s1Recipe[:ingr][1]
 			personas = arcana2.personas
 			personas.each do |p3|
 				if persona3IsValid(p1,p2,p3)
 					result = fuse3(p1,p2,p3)
 					next if (!result || result.name != self.name)
-					recipes << {:cost => fusion_cost([p1, p2, p3]), :ingr => [p1.id, p2.id, p3.id]}
+					recipes << {:cost => fusion_cost([p1, p2, p3]), :ingr => [p1, p2, p3]}
 				end
 			end
 		end
@@ -145,18 +147,18 @@ class Persona < ActiveRecord::Base
 		recipes = []
 		self_arcana = self.arcana
 
-		recipes = persona_recipes2(self_arcana)
-		combos = ArcanaFusionThree.where(:result_arcana_id => self_arcana.id)
+		recipes += persona_recipes2(self_arcana)
+		combos = self_arcana.arcana_fusion_threes
 
 		combos.each do |combo|
-			arcana1 = Arcana.find(combo.arcana1_id)
-			arcana2 = Arcana.find(combo.arcana2_id)
-			recipes << persona_recipes3(arcana1, arcana2)
-			if combo.arcana2_id != combo.arcana1_id
-				recipes << persona_recipes3(arcana2, arcana1)
+			ar1 = combo.arcana1
+			ar2 = combo.arcana2
+			recipes += persona_recipes3(ar1, ar2)
+			if ar2 != ar1
+				recipes += persona_recipes3(ar2, ar1)
 			end
 		end
 
-		return recipes
+		return recipes.sort_by { |h| h[:cost] }
 	end
 end

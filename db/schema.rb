@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150921140032) do
+ActiveRecord::Schema.define(version: 20150922175406) do
 
   create_table "arcana_fusion_threes", force: :cascade do |t|
     t.integer  "arcana1_id"
@@ -22,6 +22,8 @@ ActiveRecord::Schema.define(version: 20150921140032) do
     t.datetime "updated_at",       null: false
   end
 
+  add_index "arcana_fusion_threes", ["result_arcana_id", "arcana1_id", "arcana2_id"], name: "index_result_arcana_threes"
+
   create_table "arcana_fusion_twos", force: :cascade do |t|
     t.integer  "arcana1_id"
     t.integer  "arcana2_id"
@@ -29,6 +31,8 @@ ActiveRecord::Schema.define(version: 20150921140032) do
     t.datetime "created_at",       null: false
     t.datetime "updated_at",       null: false
   end
+
+  add_index "arcana_fusion_twos", ["result_arcana_id", "arcana1_id", "arcana2_id"], name: "index_result_arcana"
 
   create_table "arcanas", force: :cascade do |t|
     t.string   "name"
@@ -62,6 +66,7 @@ ActiveRecord::Schema.define(version: 20150921140032) do
     t.datetime "updated_at", null: false
     t.string   "slug"
     t.boolean  "max"
+    t.boolean  "special"
   end
 
   add_index "personas", ["slug"], name: "index_personas_on_slug", unique: true

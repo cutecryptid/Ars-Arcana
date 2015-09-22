@@ -23,9 +23,16 @@
 <% else %>
 	<h3>Normal Fusions</h3>
 	<ul>
-    <%= @persona.get_recipes %>
+    <% @persona.get_recipes.each do |fus| %>
         <li>
+            <%= "#{fus[:cost]} ¥ -" %>
+            <% fus[:ingr].each do |per| %>
+                <%= link_to per.name, arcana_persona_path(per.arcana.slug, per.slug) %> 
+                <%= "(#{per.arcana.name}/#{per.base_level})" %>
+                <%= ", " if fus[:ingr].last != per %>
+            <% end %>
         </li>
+    <% end %>
 	</ul>
 <% end %>
 
