@@ -148,7 +148,7 @@ class Persona < ActiveRecord::Base
 		self_arcana = self.arcana
 
 		recipes += persona_recipes2(self_arcana)
-		combos = self_arcana.arcana_fusion_threes
+		combos = self_arcana.arcana_fusion_threes.includes(:arcana1).includes(:arcana2)
 
 		combos.each do |combo|
 			ar1 = combo.arcana1
