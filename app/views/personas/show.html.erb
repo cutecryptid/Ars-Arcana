@@ -2,21 +2,24 @@
 
 <h2><%= @persona.name %></h2>
 <h3><%= @persona.arcana.name %> / <%= @persona.base_level %></h3>
+<p><%= "This persona requires to have it's Social Link maxed out!" if @persona.max %></p>
 <% if @persona.special_fusions[0] != nil%>
 	<h3>Special Fusions</h3>
 	<ul>
 	<% @persona.special_fusions.each do |sp_fus| %>
 		<li>
     	<%
-    		ingr_id = JSON.parse (sp_fus.ingr)
-    		ingr_id.each do |per_id|
-    			persona = Persona.find(per_id)
-    			concat link_to persona.name, arcana_persona_path(persona.arcana.slug, persona.slug)
-    			if per_id != ingr_id.last
-    				concat ', '
-    			end
-    		end
+            ingr_id = JSON.parse (sp_fus.ingr)
+            pers = ingr_id.map{|id| Persona.find(id)}
+            cost = @persona.fusion_cost(pers)
+    		
     	%>
+            <%= "#{cost} ¥ -" %>
+            <% pers.each do |per| %>
+                <%= link_to per.name, arcana_persona_path(per.arcana.slug, per.slug) %> 
+                <%= "(#{per.arcana.name}/#{per.base_level})" %>
+                <%= ", " if pers.last != per %>
+            <% end %>
     	</li>
     <% end %>
     </ul>

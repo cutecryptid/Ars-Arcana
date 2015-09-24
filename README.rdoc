@@ -3,3 +3,5 @@
 Ars Arcana is a parallel project to this one https://github.com/arantius/persona-fusion-calculator as they try to achieve the same, a Persona recipe calculator for Persona 4 Golden.
 
 Actually doesn't work well since it takes far too long to calculate the recipes and the display doesn't work properly neither.
+
+Current state of the app can be viewed at http://ars-arcana.herokuapp.com
